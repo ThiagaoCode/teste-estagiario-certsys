@@ -26,6 +26,8 @@ public class Postagem {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
+	@NotNull
+	@Size(min = 10, max = 100)
 	private String titulo;
 
 	@NotNull
@@ -34,72 +36,58 @@ public class Postagem {
 
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date date = new java.sql.Date(System.currentTimeMillis());
-	
-	
-	@ManyToOne 
+
+	@ManyToOne           //Interacao de tabelas
 	@JsonIgnoreProperties("Postagem")
 	private Tema tema;
 	
-	
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JsonIgnoreProperties({ "minhasPostagens" })
+	@JsonIgnoreProperties("postagens")
 	private Usuario usuario;
-
 
 	public long getId() {
 		return id;
 	}
 
-
 	public void setId(long id) {
 		this.id = id;
 	}
-
 
 	public String getTitulo() {
 		return titulo;
 	}
 
-
 	public void setTitulo(String titulo) {
 		this.titulo = titulo;
 	}
-
 
 	public String getTexto() {
 		return texto;
 	}
 
-
 	public void setTexto(String texto) {
 		this.texto = texto;
 	}
-
 
 	public Date getDate() {
 		return date;
 	}
 
-
 	public void setDate(Date date) {
 		this.date = date;
 	}
-
 
 	public Tema getTema() {
 		return tema;
 	}
 
-
 	public void setTema(Tema tema) {
 		this.tema = tema;
 	}
 
-
 	public Usuario getUsuario() {
 		return usuario;
 	}
-
 
 	public void setUsuario(Usuario usuario) {
 		this.usuario = usuario;

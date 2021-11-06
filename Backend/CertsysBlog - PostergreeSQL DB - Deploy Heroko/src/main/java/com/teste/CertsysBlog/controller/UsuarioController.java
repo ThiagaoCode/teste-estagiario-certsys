@@ -3,8 +3,6 @@ package com.teste.CertsysBlog.controller;
 import java.util.List;
 import java.util.Optional;
 
-import javax.validation.Valid;
-
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,6 +23,10 @@ import com.teste.CertsysBlog.model.UsuarioDTO;
 import com.teste.CertsysBlog.repository.UsuarioRepository;
 import com.teste.CertsysBlog.service.UsuarioService;
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.ApiResponse;
+
 @RestController
 @RequestMapping("/usuarios")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -36,39 +38,50 @@ public class UsuarioController {
 	@Autowired
 	private UsuarioService usuarioService;
 	
-	@PostMapping("/logar")
+	@ApiOperation(value = "Salva novo usuario no sistema")
+	@ApiResponses(value = {
+			@ApiResponse(code = 201, message = "Retorna usuario cadastrado"),
+			@ApiResponse(code = 400, message = "Erro na requisição")
+	})
+	
+	
+	
+		
+	@PostMapping("/logar") 
 	public ResponseEntity<UsuarioDTO> Autentication(@RequestBody Optional<UsuarioDTO> user){
 		return usuarioService.Logar(user).map(resp -> ResponseEntity.ok(resp))
 				.orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
 	}
 	
-	@PostMapping("/cadastrar")
+	
+	
+	@ApiOperation(value = "Autentica usuario no sistema")
+	@ApiResponses(value = {
+			@ApiResponse(code = 201, message = "Retorna credenciais de usuario"),
+			@ApiResponse(code = 400, message = "Erro na requisição ou usuario não credenciado")
+	})
+	
+	
+	
+	@PostMapping("/cadastrar")	
 	public ResponseEntity<Usuario> Post(@RequestBody Usuario usuario){
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(usuarioService.CadastrarUsuario(usuario));
 	}
+		
 	
-	@GetMapping("/todes")
-	public ResponseEntity<Object> buscarTodes() {
-		List<Usuario> listaUsuarios = repository.findAll();
-
-		if (listaUsuarios.isEmpty()) {
-			return ResponseEntity.status(204).build();
-		} else {
-			return ResponseEntity.status(200).body(listaUsuarios);
-		}
-
+	@GetMapping
+	public ResponseEntity<List<Usuario>> GetAll() {
+		return ResponseEntity.ok(repository.findAll());
 	}
 	
-	@GetMapping("/{id_usuario}")
-	public ResponseEntity<Usuario> buscarPorId(@PathVariable(value = "id_usuario") Long id) {
-		Optional<Usuario> objetoUsuario = repository.findById(id);
-		if (objetoUsuario.isPresent()) {
-			return ResponseEntity.status(200).body(objetoUsuario.get());
-		} else {
-			return ResponseEntity.status(204).build();
-		}
+		
+	
+	@GetMapping("/{id}")
+	public ResponseEntity<Usuario> GetById(@PathVariable long id) {
+		return repository.findById(id).map(resp -> ResponseEntity.ok(resp)).orElse(ResponseEntity.notFound().build());
 	}
+	
 	
 	
 	@GetMapping("/pesquisa")
@@ -76,18 +89,16 @@ public class UsuarioController {
 		return ResponseEntity.status(200).body(repository.findAllByNomeContainingIgnoreCase(nome));
 	}
 	
-	@PutMapping("/alterar")
-	public ResponseEntity<Object> alterar(@Valid @RequestBody UsuarioDTO novoUsuario) {
-		Optional<?> objetoAlterado = usuarioService.alterarUsuario(novoUsuario);
-
-		if (objetoAlterado.isPresent()) {
-			return ResponseEntity.status(201).body(objetoAlterado.get());
-		} else {
-			return ResponseEntity.status(400).build();
-		}
+	
+	
+	@PutMapping
+	public ResponseEntity<Usuario> Put(@RequestBody Usuario usuario) {
+		return ResponseEntity.ok(repository.save(usuario));
 	}
 	
-	@DeleteMapping("/deletar/{id_usuario}")
+
+	
+	@DeleteMapping("/deletar/{id}")
 	public ResponseEntity<Object> deletarPorId(@PathVariable(value = "id_usuario") Long id) {
 		Optional<Usuario> objetoExistente = repository.findById(id);
 		if (objetoExistente.isPresent()) {

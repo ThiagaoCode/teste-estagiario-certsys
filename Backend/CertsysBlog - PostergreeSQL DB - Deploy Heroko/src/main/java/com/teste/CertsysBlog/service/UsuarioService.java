@@ -20,50 +20,41 @@ public class UsuarioService {
 	private UsuarioRepository repository;
 	
 	public Usuario CadastrarUsuario(Usuario usuario) {
-		BCryptPasswordEncoder enconder = new BCryptPasswordEncoder();
-		
-		String senhaEnconder = enconder.encode(usuario.getSenha());
-		usuario.setSenha(senhaEnconder);
-		
+		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+		String senhaEncoder = encoder.encode(usuario.getSenha());
+		usuario.setSenha(senhaEncoder);
+
 		return repository.save(usuario);
-		
 	}
-	
-	
-	public Optional<UsuarioDTO> Logar(Optional<UsuarioDTO> user){
-		BCryptPasswordEncoder enconder = new BCryptPasswordEncoder();
-		Optional<Usuario> usuario = repository.findByUsuarioContainingIgnoreCase(user.get().getUsuario());
-		
-		if(usuario.isPresent()) {
-			if(enconder.matches(user.get().getSenha(), usuario.get().getSenha())) {
-				
-				String auth = user.get().getSenha() + " : " + user.get().getSenha();
-				byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(Charset.forName("US-ASCII"))); 
+
+	public Optional<UsuarioDTO> Logar(Optional<UsuarioDTO> user) {
+
+		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+		Optional<Usuario> usuario = repository.findByUsuario(user.get().getUsuario());
+
+		if (usuario.isPresent()) {
+			if (encoder.matches(user.get().getSenha(), usuario.get().getSenha())) {
+
+				String auth = user.get().getUsuario() + ":" + user.get().getSenha();
+				byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(Charset.forName("US-ASCII")));
 				String authHeader = "Basic " + new String(encodedAuth);
-				
-				user.get().setToken(authHeader);
+
+				user.get().setToken(authHeader);			
+				user.get().setId(usuario.get().getId());
 				user.get().setNome(usuario.get().getNome());
+				user.get().setFoto(usuario.get().getFoto());
+				user.get().setTipo(usuario.get().getTipo());
 				
 				return user;
+
 			}
-			
 		}
-		
 		return null;
-		
 	}
 	
-	public Optional<?> alterarUsuario(UsuarioDTO usuarioParaAlterar) {
-		return repository.findById(usuarioParaAlterar.getId()).map(usuarioExistente -> {
-			BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-			String senhaCriptografada = encoder.encode(usuarioParaAlterar.getSenha());
+	
 
-			usuarioExistente.setNome(usuarioParaAlterar.getNome());
-			usuarioExistente.setSenha(senhaCriptografada);
-			return Optional.ofNullable(repository.save(usuarioExistente));
-		}).orElseGet(() -> {
-			return Optional.empty();
-		});
-	}
 
 }
+
